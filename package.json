@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "yarn build:scraper && yarn build:trigger",
+    "build:scraper": "tsc --project ./tsconfig.json",
+    "build:trigger": "yarn parcel build trigger.ts --target=node --global handler --bundle-node-modules --no-source-maps"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.35",
+    "@types/isomorphic-fetch": "^0.0.35",
+    "@types/node": "^12.12.7",
+    "@types/puppeteer": "^1.20.2",
+    "parcel": "^1.12.4",
+    "parcel-plugin-zip": "^1.0.6",
+    "ts-node": "^8.4.1",
+    "typescript": "^3.7.2"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.568.0",
+    "chrome-aws-lambda": "^2.0.0",
+    "isomorphic-fetch": "^2.2.1",
+    "puppeteer": "^2.0.0"
+  }
+}
