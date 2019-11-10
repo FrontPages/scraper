@@ -1,10 +1,10 @@
 import chromium from 'chrome-aws-lambda'
 
-import { Site } from './types';
+import { Site } from './types'
 
 export const handler = async (site: Site, context: AWSLambda.Context) => {
-  let result = null;
-  let browser = null;
+  let result = null
+  let browser = null
 
   try {
     browser = await chromium.puppeteer.launch({
@@ -25,11 +25,14 @@ export const handler = async (site: Site, context: AWSLambda.Context) => {
     const headlineElements = await page.$$(site.selector)
     const headlines = await Promise.all(
       headlineElements.map(headlineElement =>
-        headlineElement.evaluate(node => node.textContent)
-      )
+        headlineElement.evaluate(node => node.textContent),
+      ),
     )
     console.log(`Headlines: ${JSON.stringify(headlines, null, 2)}`)
-    const screenshot = await page.screenshot({ fullPage: true, encoding: 'base64' })
+    const screenshot = await page.screenshot({
+      fullPage: true,
+      encoding: 'base64',
+    })
     console.log(screenshot)
     result = await page.title()
     console.log(`Page title: ${result}`)
