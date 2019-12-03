@@ -8,3 +8,8 @@ export interface Site {
   updatedAt: string
   script?: string
 }
+
+export interface Headline {
+  title: string
+  url: string
+}
