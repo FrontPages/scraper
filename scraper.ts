@@ -5,6 +5,9 @@ import http from 'http'
 
 import { Site, Headline } from './types'
 
+const FRONT_PAGES_BASE_URL =
+  process.env.FRONT_PAGES_BASE_URL || 'http://front-pages-sandbox.herokuapp.com'
+
 // We scroll up from the bottom rather than down from the top, due to "the way
 // that images are lazy-loaded" (— Jay). :shrug_emoji:
 const scrollUpPageFromBottom = async (page: Page) => {
@@ -164,7 +167,7 @@ const postToFrontPages = (
       },
     })
 
-    const url = 'http://front-pages-sandbox.herokuapp.com/snapshots/create'
+    const url = `${FRONT_PAGES_BASE_URL}/snapshots/create`
     const options = {
       method: 'POST',
       headers: {
