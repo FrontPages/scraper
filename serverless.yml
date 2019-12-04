@@ -5,16 +5,6 @@ provider:
   region: us-east-1
   runtime: nodejs12.x
 
-  iamRoleStatements:
-    - Effect: 'Allow'
-      Action:
-        - 's3:ListBucket'
-      Resource: 'arn:aws:s3:::${env:BUCKET_NAME}'
-    - Effect: 'Allow'
-      Action:
-        - 's3:PutObject'
-      Resource: 'arn:aws:s3:::${env:BUCKET_NAME}'
-
 functions:
   scraper:
     name: front-pages-scraper
@@ -25,6 +15,7 @@ functions:
       FRONT_PAGES_BASE_URL: ${env:FRONT_PAGES_BASE_URL}
     memorySize: 1536
     timeout: 60
+    role: frontPagesScraperRole
     layers:
       # This layer provides the `chrome-aws-lambda` library so that we can run
       # Puppeteer in Lambda.
@@ -65,6 +56,52 @@ package:
 
 resources:
   Resources:
+    frontPagesScraperRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: frontPagesScraperRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: frontPagesScraperRolePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - 'Fn::Join':
+                        - ':'
+                        - - 'arn:aws:logs'
+                          - Ref: 'AWS::Region'
+                          - Ref: 'AWS::AccountId'
+                          - 'log-group:/aws/lambda/*:*:*'
+                - Effect: 'Allow'
+                  Action:
+                    - 's3:PutObject'
+                  Resource:
+                    Fn::Join:
+                      - ''
+                      - - 'arn:aws:s3:::'
+                        - 'Ref': 'ServerlessDeploymentBucket'
+                - Effect: 'Allow'
+                  Action:
+                    - 's3:ListBucket'
+                  Resource: 'arn:aws:s3:::${env:BUCKET_NAME}'
+                - Effect: 'Allow'
+                  Action:
+                    - 's3:PutObject'
+                  Resource: 'arn:aws:s3:::${env:BUCKET_NAME}'
+
     frontPagesScraperTriggerRole:
       Type: AWS::IAM::Role
       Properties:
@@ -78,7 +115,7 @@ resources:
                   - lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyName: frontPagesScraperTriggerRoleInvokePolicy
+          - PolicyName: frontPagesScraperTriggerRolePolicy
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
@@ -98,3 +135,23 @@ resources:
                           ],
                         ],
                     }
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - 'Fn::Join':
+                        - ':'
+                        - - 'arn:aws:logs'
+                          - Ref: 'AWS::Region'
+                          - Ref: 'AWS::AccountId'
+                          - 'log-group:/aws/lambda/*:*:*'
+                - Effect: 'Allow'
+                  Action:
+                    - 's3:PutObject'
+                  Resource:
+                    Fn::Join:
+                      - ''
+                      - - 'arn:aws:s3:::'
+                        - 'Ref': 'ServerlessDeploymentBucket'
