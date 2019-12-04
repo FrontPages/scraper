@@ -43,10 +43,6 @@ const scrollUpPageFromBottom = async (page: Page) => {
   })
 }
 
-// http://www.wryway.com/blog/aws-s3-url-styles/
-const getScreenshotURL = (bucket: string, region: string, filename: string) =>
-  `https://${bucket}.s3.${region}.amazonaws.com/${filename}`
-
 const launchBrowser = async () =>
   await chromium.puppeteer.launch({
     args: chromium.args,
