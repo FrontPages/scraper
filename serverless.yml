@@ -1,0 +1,32 @@
+service: frontpages-scraper
+
+provider:
+  name: aws
+  region: us-east-1
+  runtime: nodejs12.x
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 's3:ListBucket'
+      Resource: 'arn:aws:s3:::${env:BUCKET_NAME}'
+    - Effect: 'Allow'
+      Action:
+        - 's3:PutObject'
+      Resource: 'arn:aws:s3:::${env:BUCKET_NAME}'
+
+functions:
+  scraper:
+    handler: scraper.handler
+    environment:
+      BUCKET_NAME: ${env:BUCKET_NAME}
+      FRONT_PAGES_API_KEY: ${env:FRONT_PAGES_API_KEY}
+      FRONT_PAGES_BASE_URL: ${env:FRONT_PAGES_BASE_URL}
+
+plugins:
+  - serverless-dotenv-plugin
+
+package:
+  exclude:
+    - ./**
+  include:
+    - dist/**

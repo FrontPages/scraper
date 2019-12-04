@@ -1,6 +1,7 @@
 {
   "private": true,
   "scripts": {
+    "deploy": "sls deploy --stage production",
     "build": "yarn build:scraper && yarn build:trigger",
     "build:scraper": "tsc --project ./tsconfig.json",
     "build:trigger": "yarn parcel build trigger.ts --target=node --global handler --bundle-node-modules --no-source-maps"
@@ -13,6 +14,8 @@
     "parcel": "^1.12.4",
     "parcel-plugin-zip": "^1.0.6",
     "prettier": "^1.19.1",
+    "serverless": "^1.58.0",
+    "serverless-dotenv-plugin": "^2.1.1",
     "ts-node": "^8.4.1",
     "typescript": "^3.7.2",
     "webpack": "^4.41.2",
