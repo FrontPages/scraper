@@ -23,20 +23,19 @@ export const handler = async (
     console.log(
       `Invoking '${process.env.SCRAPER_FUNCTION_NAME}' for site '${site.name}'`,
     )
-
     // This invocation follows the example from
     // https://stackoverflow.com/a/31745774/974981
     lambda.invoke(
       {
         FunctionName: process.env.SCRAPER_FUNCTION_NAME as string,
         Payload: JSON.stringify(site),
+        InvocationType: 'Event',
       },
       function(error, data) {
         if (error) {
           console.error(
             `Invoking '${process.env.SCRAPER_FUNCTION_NAME}' for site '${site.name}' failed. Error: ${error}`,
           )
-          return context.fail(error)
         }
 
         console.log(
