@@ -4,6 +4,7 @@ provider:
   name: aws
   region: us-east-1
   runtime: nodejs12.x
+
   iamRoleStatements:
     - Effect: 'Allow'
       Action:
@@ -16,11 +17,23 @@ provider:
 
 functions:
   scraper:
-    handler: scraper.handler
+    handler: dist/scraper.handler
     environment:
       BUCKET_NAME: ${env:BUCKET_NAME}
       FRONT_PAGES_API_KEY: ${env:FRONT_PAGES_API_KEY}
       FRONT_PAGES_BASE_URL: ${env:FRONT_PAGES_BASE_URL}
+    memorySize: 1536
+    timeout: 60
+    layers:
+      - arn:aws:lambda:us-east-1:764866452798:layer:chrome-aws-lambda:8
+    package:
+      exclude:
+        - ./**
+      include:
+        - ./dist/scraper.js
+
+    # The `chrome-aws-lambda` layer only supports Node 10, not Node 12.
+    runtime: nodejs10.x
 
 plugins:
   - serverless-dotenv-plugin
@@ -29,4 +42,4 @@ package:
   exclude:
     - ./**
   include:
-    - dist/**
+    - ./dist/**
