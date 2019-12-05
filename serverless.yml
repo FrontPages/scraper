@@ -39,6 +39,9 @@ functions:
     timeout: 30
     role: frontPagesScraperTriggerRole
 
+    events:
+      - schedule: rate(1 hour)
+
     package:
       exclude:
         - ./**
