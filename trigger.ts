@@ -19,33 +19,40 @@ export const handler = async (
   // See https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
   const lambda = new aws.Lambda({ region: process.env.AWS_REGION })
 
-  sites.sites.forEach(site => {
-    console.log(
-      `Invoking '${process.env.SCRAPER_FUNCTION_NAME}' for site '${site.name}'`,
-    )
-    // This invocation follows the example from
-    // https://stackoverflow.com/a/31745774/974981
-    lambda.invoke(
-      {
-        FunctionName: process.env.SCRAPER_FUNCTION_NAME as string,
-        Payload: JSON.stringify(site),
-        InvocationType: 'Event',
-      },
-      function(error, data) {
-        if (error) {
-          console.error(
-            `Invoking '${process.env.SCRAPER_FUNCTION_NAME}' for site '${site.name}' failed. Error: ${error}`,
-          )
-        }
+  await Promise.all(
+    sites.sites.map(site => {
+      console.log(
+        `Invoking '${process.env.SCRAPER_FUNCTION_NAME}' for site '${site.name}'`,
+      )
 
-        console.log(
-          `Invoking '${process.env.SCRAPER_FUNCTION_NAME}' for site '${site.name}' succeeded.`,
+      // This invocation follows the example from
+      // https://stackoverflow.com/a/31745774/974981
+      return new Promise((resolve, reject) => {
+        lambda.invoke(
+          {
+            FunctionName: process.env.SCRAPER_FUNCTION_NAME as string,
+            Payload: JSON.stringify(site),
+            InvocationType: 'Event',
+          },
+          function(error, data) {
+            if (error) {
+              console.error(
+                `Invoking '${process.env.SCRAPER_FUNCTION_NAME}' for site '${site.name}' failed. Error: ${error}`,
+              )
+              reject()
+            }
+
+            console.log(
+              `Invoking '${process.env.SCRAPER_FUNCTION_NAME}' for site '${site.name}' succeeded.`,
+            )
+
+            if (data!.Payload) {
+              console.log(`Payload for site '${site.name}': ${data.Payload}`)
+            }
+            resolve()
+          },
         )
-
-        if (data!.Payload) {
-          console.log(`Payload for site '${site.name}': ${data.Payload}`)
-        }
-      },
-    )
-  })
+      })
+    }),
+  )
 }
