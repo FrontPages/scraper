@@ -43,15 +43,15 @@ const scrollUpPageFromBottom = async (page: Page) => {
   })
 }
 
-const launchBrowser = async () =>
+export const launchBrowser = async () =>
   await chromium.puppeteer.launch({
     args: chromium.args,
     defaultViewport: chromium.defaultViewport,
     executablePath: await chromium.executablePath,
-    headless: chromium.headless,
+    headless: true,
   })
 
-const createPageAndSetViewport = async (browser: Browser) => {
+export const createPageAndSetViewport = async (browser: Browser) => {
   const page = await browser.newPage()
   await page.setViewport({
     width: 1440,
@@ -62,13 +62,16 @@ const createPageAndSetViewport = async (browser: Browser) => {
 }
 
 const isValidHeadline = (headline: {
-  title?: string
+  title?: string | null
   url?: string | null
 }): headline is Headline => !!headline.url && !!headline.title
 
-const getHeadlines = async (site: Site, page: Page): Promise<Headline[]> => {
+export const getHeadlines = async (
+  selector: string,
+  page: Page,
+): Promise<Headline[]> => {
   const headlineElements: ElementHandle<HTMLAnchorElement>[] = await page.$$(
-    site.selector,
+    selector,
   )
 
   const headlines = await Promise.all(
@@ -84,12 +87,19 @@ const getHeadlines = async (site: Site, page: Page): Promise<Headline[]> => {
           return getHrefFromThisOrAncestor(possibleAnchorElement.parentElement)
         }
 
+        const getTextFromThisOrFirstChild = (
+          possibleTextContent: Text | Node | null,
+        ): string | null => {
+          if (!possibleTextContent) return null
+          if (possibleTextContent instanceof Text)
+            return possibleTextContent.textContent
+
+          return getTextFromThisOrFirstChild(possibleTextContent.firstChild)
+        }
+
         return {
           url: getHrefFromThisOrAncestor(node),
-          // Safe to cast to `string`, since `textContent` is only ever null in
-          // situations that don't apply here. See
-          // https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent#Description
-          title: node.textContent as string,
+          title: getTextFromThisOrFirstChild(node),
         }
       }),
     ),
@@ -196,7 +206,7 @@ export const handler = async (site: Site, context: AWSLambda.Context) => {
     // Run these two in parallel to save time.
     const [filename, headlines] = await Promise.all([
       takeAndUploadScreenshot(page, site, context),
-      getHeadlines(site, page),
+      getHeadlines(site.selector, page),
     ])
 
     const response = await postToFrontPages(site.id, filename, headlines)
