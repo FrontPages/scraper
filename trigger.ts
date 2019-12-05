@@ -13,7 +13,7 @@ export const handler = async (
     )
   }
 
-  const response = await fetch('https://front-pages.herokuapp.com/sites')
+  const response = await fetch(`${process.env.FRONT_PAGES_BASE_URL}/sites`)
   const sites: { sites: Site[] } = await response.json()
 
   // See https://docs.aws.amazon.com/lambda/latest/dg/lambda-environment-variables.html
