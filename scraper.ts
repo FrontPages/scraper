@@ -146,7 +146,22 @@ const uploadScreenshot = async (
           return context.fail(error)
         }
 
-        resolve(screenshotFilename)
+        s3.putObjectAcl(
+          {
+            ACL: 'bucket-owner-full-control',
+            Bucket: process.env.BUCKET_NAME as string,
+            Key: screenshotFilename,
+          },
+          error => {
+            if (error) {
+              console.error(`Setting ACL on screenshot failed. Error: ${error}`)
+              reject(error)
+              return context.fail(error)
+            }
+
+            resolve(screenshotFilename)
+          },
+        )
       },
     )
   })
