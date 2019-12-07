@@ -1,12 +1,15 @@
 import aws from 'aws-sdk' // Provided automatically by AWS Lambda
 import { Browser, ElementHandle, Page } from 'puppeteer'
 import chromium from 'chrome-aws-lambda' // Provided by an AWS Lambda Layer
-import http from 'http'
+import https from 'https'
+import { IncomingMessage } from 'http'
+import { URL } from 'url'
 
 import { Site, Headline } from './types'
 
 const FRONT_PAGES_BASE_URL =
-  process.env.FRONT_PAGES_BASE_URL || 'http://front-pages-sandbox.herokuapp.com'
+  process.env.FRONT_PAGES_BASE_URL ||
+  'https://front-pages-sandbox.herokuapp.com'
 
 // We scroll up from the bottom rather than down from the top, due to "the way
 // that images are lazy-loaded" (— Jay). :shrug_emoji:
@@ -163,7 +166,7 @@ const postToFrontPages = (
   filename: string,
   headlines: Headline[],
 ) =>
-  new Promise<http.IncomingMessage>((resolve, reject) => {
+  new Promise<IncomingMessage>((resolve, reject) => {
     const requestBody = JSON.stringify({
       api_key: process.env.FRONT_PAGES_API_KEY,
       snapshot: {
@@ -173,15 +176,17 @@ const postToFrontPages = (
       },
     })
 
-    const url = `${FRONT_PAGES_BASE_URL}/snapshots/create`
-    const options = {
+    const url = new URL(FRONT_PAGES_BASE_URL)
+    const options: https.RequestOptions = {
+      host: url.host,
+      path: '/snapshots/create',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(requestBody),
       },
     }
-    const req = http.request(url, options, resolve)
+    const req = https.request(options, resolve)
 
     req.on('error', error => reject(error.message))
     req.write(requestBody)
