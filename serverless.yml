@@ -14,7 +14,6 @@ functions:
       FRONT_PAGES_API_KEY: ${env:FRONT_PAGES_API_KEY}
       FRONT_PAGES_BASE_URL: ${env:FRONT_PAGES_BASE_URL}
     memorySize: 1536
-    # When Heroku is up and running (not auto-sleeping), set this back to 60.
     timeout: 120
     role: frontPagesScraperRole
     layers:
@@ -37,8 +36,7 @@ functions:
     environment:
       SCRAPER_FUNCTION_NAME: front-pages-scraper
     memorySize: 128
-    # When Heroku is up and running (not auto-sleeping), set this back to 30.
-    timeout: 90
+    timeout: 30
     role: frontPagesScraperTriggerRole
 
     events:
