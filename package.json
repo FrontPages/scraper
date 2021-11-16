@@ -23,7 +23,7 @@
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "aws-sdk": "^2.568.0",
+    "aws-sdk": "^2.814.0",
     "chrome-aws-lambda": "^2.0.0",
     "isomorphic-fetch": "^2.2.1",
     "puppeteer": "^2.0.0"
